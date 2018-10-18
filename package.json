@@ -1,0 +1,24 @@
+{
+  "name": "d3-heat-map",
+  "version": "1.0.0",
+  "description": "d3 heat map showing global land-surface temperature changes over time",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpstanway/d3-heat-map.git"
+  },
+  "author": "Jordan Stanway",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jpstanway/d3-heat-map/issues"
+  },
+  "homepage": "https://github.com/jpstanway/d3-heat-map#readme",
+  "devDependencies": {
+    "browser-sync": "^2.26.3",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^4.0.2"
+  }
+}
