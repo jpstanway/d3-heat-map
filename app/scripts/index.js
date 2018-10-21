@@ -14,10 +14,23 @@ req.onload = () => {
     json = JSON.parse(req.responseText);
     console.log(json);
 
+    json.monthlyVariance.forEach((data) => {
+        dataset.push({
+            year: data.year,
+            month: data.month
+        });
+    });
+
+    console.log(dataset);
+
     // svg chart dimensions
     const w = 1080;
     const h = 600;
-    const p = 30;
+    const p = 60;
+
+    // create array with month names
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
 
     // create svg
     const svg = d3.select('#container')
@@ -27,16 +40,21 @@ req.onload = () => {
 
     // create scales
     const xScale = d3.scaleLinear()
-                    .domain([0, 10])
-                    .range([p, w - p]);
+                    .domain([d3.min(dataset, (d) => d.year), d3.max(dataset, (d) => d.year)])
+                    .range([p, w - p])
+                    .nice();
 
     const yScale = d3.scaleLinear()
-                    .domain([0, 10])
+                    .domain([d3.min(dataset, (d) => d.month), d3.max(dataset, (d) => d.month)])
                     .range([p, h - p]);
 
     // create axes
-    const xAxis = d3.axisBottom(xScale);
-    const yAxis = d3.axisLeft(yScale);    
+    const xAxis = d3.axisBottom(xScale)
+                    .tickFormat(d3.format('d'));
+    const yAxis = d3.axisLeft(yScale)
+                    .tickFormat((d, i) => {
+                        return months[i];
+                    });
 
     // append axes to svg
     svg.append('g')
