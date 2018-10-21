@@ -17,7 +17,8 @@ req.onload = () => {
     json.monthlyVariance.forEach((data) => {
         dataset.push({
             year: data.year,
-            month: data.month
+            month: data.month,
+            change: data.variance
         });
     });
 
@@ -32,11 +33,24 @@ req.onload = () => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
 
+    // create tooltip
+    const tip = d3.tip()
+                  .attr('class', 'd3-tip')
+                  .attr('id', 'tooltip')
+                  .html((d) => {
+                    d3.select('#tooltip').attr('data-year', d.year);
+                    return `
+                        <p>${d.month} ${d.year}</p>
+                        <p>${d.change}</p>
+                    `;
+                  });                
+
     // create svg
     const svg = d3.select('#container')
                     .append('svg')
                     .attr('width', w)
-                    .attr('height', h);
+                    .attr('height', h)
+                    .call(tip);
 
     // create scales
     const xScale = d3.scaleLinear()
@@ -67,7 +81,19 @@ req.onload = () => {
         .attr('id', 'y-axis')
         .call(yAxis);    
 
-
-
-    
+    // create and append rect elements for data
+    svg.selectAll('rect')
+       .data(dataset)
+       .enter()
+       .append('rect')
+       .attr('class', 'cell')
+       .attr('width', 2)
+       .attr('height', h / 12)
+       .attr('x', (d) => xScale(d.year))
+       .attr('y', (d) => yScale(d.month))
+       .attr('data-month', (d) => d.month)
+       .attr('data-year', (d) => d.year)
+       .attr('data-temp', (d) => d.change)
+       .on('mouseover', tip.show)
+       .on('mouseout', tip.hide);
 }
