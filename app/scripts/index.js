@@ -2,6 +2,7 @@
 // create global variables
 const url = 'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json';
 const dataset = [];
+const base = 8.66;
 let json, req;
 
 // request data from api
@@ -12,26 +13,60 @@ req.onload = () => {
 
     // store data in json variable
     json = JSON.parse(req.responseText);
-    console.log(json);
 
     json.monthlyVariance.forEach((data) => {
         dataset.push({
             year: data.year,
             month: data.month,
-            change: data.variance
+            change: data.variance,
+            temp: base + data.variance
         });
     });
 
-    console.log(dataset);
-
-    // svg chart dimensions
+    // svg chart specific variables
     const w = 1080;
     const h = 600;
     const p = 60;
+    
+    const rectW = 4;
+    const rectH = 45;
 
-    // create array with month names
+    // create arrays with additional data
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
+                   
+    // create function for assigning colors
+    const colors = ['#080051', '1D06FF', '#6F06E8', '#D607FF', '#E80692', '#FF0500', '#4b0200'];
+
+    function colorMap(temp) {
+        switch(true) {
+            case (temp <= 3):
+                console.log(colors[0]);
+                return colors[0];
+                break;
+            case (temp <= 5):
+                return colors[1];
+                break;
+            case (temp <= 7):
+                return colors[2];
+                break;        
+            case (temp <= 9):
+                return colors[3];
+                break;
+            case (temp <= 11):
+                return colors[4];
+                break;
+            case (temp <= 13):
+                return colors[5];
+                break;
+            case (temp <= 14):
+                return colors[6];
+                break;    
+            default:
+                return 'black';
+                break;                
+       }
+    }                
 
     // create tooltip
     const tip = d3.tip()
@@ -41,7 +76,7 @@ req.onload = () => {
                     d3.select('#tooltip').attr('data-year', d.year);
                     return `
                         <p>${d.month} ${d.year}</p>
-                        <p>${d.change}</p>
+                        <p>${d.temp.toFixed(2)}&#8451; | ${d.change.toFixed(2)}&#8451;</p>
                     `;
                   });                
 
@@ -87,13 +122,14 @@ req.onload = () => {
        .enter()
        .append('rect')
        .attr('class', 'cell')
-       .attr('width', 2)
-       .attr('height', h / 12)
+       .attr('width', rectW)
+       .attr('height', rectH)
        .attr('x', (d) => xScale(d.year))
        .attr('y', (d) => yScale(d.month))
        .attr('data-month', (d) => d.month)
        .attr('data-year', (d) => d.year)
        .attr('data-temp', (d) => d.change)
+       .style('fill', (d) => colorMap(d.temp))
        .on('mouseover', tip.show)
        .on('mouseout', tip.hide);
 }
