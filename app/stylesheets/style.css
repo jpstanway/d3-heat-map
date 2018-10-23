@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css?family=Nunito:400,400i,700|Roboto:400,700");
 @import url("//rawgithub.com/Caged/d3-tip/master/examples/example-styles.css");
 body {
+  padding-top: 50px;
   font-family: 'Nunito', 'Arial', sans-serif;
-  background-color: #eee; }
+  background-color: #f8f1ff; }
 
 #map {
   width: 1080px;
@@ -40,3 +41,6 @@ body {
 
 .cell:hover {
   opacity: 0.5; }
+
+.tick {
+  font-weight: bold; }

@@ -106,6 +106,7 @@ req.onload = () => {
     const xAxis = d3.axisBottom(xScale)
                     .tickFormat(d3.format('d'));
     const yAxis = d3.axisLeft(yScale)
+                    .tickPadding([1])
                     .tickFormat((d, i) => {
                         return months[i];
                     });
@@ -122,7 +123,13 @@ req.onload = () => {
     map.append('g')
         .attr('transform', `translate(${p}, 0)`)
         .attr('id', 'y-axis')
-        .call(yAxis);    
+        .call(yAxis)
+        .call(adjustLabels);
+        
+    function adjustLabels(selection) {
+        selection.selectAll('.tick text')
+                 .attr('transform', `translate(0, 20)`);
+    }    
 
     // create and append rect elements for data
     map.selectAll('rect')
