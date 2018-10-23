@@ -1,9 +1,18 @@
 body {
   background-color: #eee; }
 
-#container {
+#map {
   width: 1080px;
   height: auto;
   margin: auto;
   text-align: center;
   background-color: #fff; }
+
+#legend {
+  width: 540px;
+  height: auto;
+  margin: 20px auto;
+  background-color: #fff; }
+
+#tooltip {
+  text-align: center; }

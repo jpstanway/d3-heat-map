@@ -17,7 +17,7 @@ req.onload = () => {
     json.monthlyVariance.forEach((data) => {
         dataset.push({
             year: data.year,
-            month: data.month,
+            month: data.month - 1,
             change: data.variance,
             temp: base + data.variance
         });
@@ -26,46 +26,43 @@ req.onload = () => {
     // svg chart specific variables
     const w = 1080;
     const h = 600;
-    const p = 60;
+    const p = 65;
     
     const rectW = 4;
     const rectH = 45;
+
+    const legendW = 540;
+    const legendH = 65;
+    const legendP = 25;
+
+    const legendRectW = 70;
+    const legendRectH = 40;
 
     // create arrays with additional data
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
                    
     // create function for assigning colors
-    const colors = ['#080051', '1D06FF', '#6F06E8', '#D607FF', '#E80692', '#FF0500', '#4b0200'];
+    const colors = [
+        [[1, 2], '#080051'], 
+        [[3, 4], '1D06FF'], 
+        [[5, 6], '#6F06E8'],
+        [[7, 8], '#D607FF'], 
+        [[9, 10], '#E80692'], 
+        [[11, 12], '#FF0500'], 
+        [[13, 15], '#4b0200']
+    ];
 
     function colorMap(temp) {
-        switch(true) {
-            case (temp <= 3):
-                console.log(colors[0]);
-                return colors[0];
-                break;
-            case (temp <= 5):
-                return colors[1];
-                break;
-            case (temp <= 7):
-                return colors[2];
-                break;        
-            case (temp <= 9):
-                return colors[3];
-                break;
-            case (temp <= 11):
-                return colors[4];
-                break;
-            case (temp <= 13):
-                return colors[5];
-                break;
-            case (temp <= 14):
-                return colors[6];
-                break;    
-            default:
-                return 'black';
-                break;                
-       }
+        const num = Number(temp.toFixed(0));
+        
+        for(let i = 0; i < colors.length; i++){
+            for(let j = 0; j < colors[i][0].length; j++) {
+                if(num === colors[i][0][j]) {
+                    return colors[i][1];
+                }
+            }
+        }
     }                
 
     // create tooltip
@@ -75,28 +72,36 @@ req.onload = () => {
                   .html((d) => {
                     d3.select('#tooltip').attr('data-year', d.year);
                     return `
-                        <p>${d.month} ${d.year}</p>
-                        <p>${d.temp.toFixed(2)}&#8451; | ${d.change.toFixed(2)}&#8451;</p>
+                        <p>${months[d.month]} ${d.year}</p>
+                        <p>${d.change.toFixed(2)}&#8451; | ${d.temp.toFixed(2)}&#8451;</p>
                     `;
                   });                
 
-    // create svg
-    const svg = d3.select('#container')
+    // create main map and legend areas
+    const map = d3.select('#map')
                     .append('svg')
                     .attr('width', w)
                     .attr('height', h)
                     .call(tip);
 
+    const legend = d3.select('#legend')                
+                    .append('svg')
+                    .attr('width', legendW)
+                    .attr('height', legendH);
+
     // create scales
     const xScale = d3.scaleLinear()
                     .domain([d3.min(dataset, (d) => d.year), d3.max(dataset, (d) => d.year)])
-                    .range([p, w - p])
-                    .nice();
-
+                    .range([p, w - p]);
+                  
     const yScale = d3.scaleLinear()
                     .domain([d3.min(dataset, (d) => d.month), d3.max(dataset, (d) => d.month)])
                     .range([p, h - p]);
 
+    const legendScale = d3.scaleLinear()
+                          .domain([d3.min(colors[0][0], (d) => d), d3.max(colors[6][0], (d) => d)])
+                          .range([legendP, legendW - legendP]);                
+               
     // create axes
     const xAxis = d3.axisBottom(xScale)
                     .tickFormat(d3.format('d'));
@@ -105,19 +110,22 @@ req.onload = () => {
                         return months[i];
                     });
 
+    const legendAxis = d3.axisBottom(legendScale)
+                        .tickValues([1, 3, 5, 7, 9, 11, 13, 15]);                
+
     // append axes to svg
-    svg.append('g')
-        .attr('transform', `translate(0, ${h - p})`)
+    map.append('g')
+        .attr('transform', `translate(0, ${h - p + 45})`)
         .attr('id', 'x-axis')
         .call(xAxis);
 
-    svg.append('g')
+    map.append('g')
         .attr('transform', `translate(${p}, 0)`)
         .attr('id', 'y-axis')
         .call(yAxis);    
 
     // create and append rect elements for data
-    svg.selectAll('rect')
+    map.selectAll('rect')
        .data(dataset)
        .enter()
        .append('rect')
@@ -131,5 +139,29 @@ req.onload = () => {
        .attr('data-temp', (d) => d.change)
        .style('fill', (d) => colorMap(d.temp))
        .on('mouseover', tip.show)
-       .on('mouseout', tip.hide);
+       .on('mouseout', tip.hide);   
+
+    // append axis to legend area
+    legend.append('g')
+          .attr('transform', `translate(0, ${legendH - legendP})`)
+          .attr('id', 'legend-axis')
+          .call(legendAxis);
+
+    // append rect elements to legend
+    legend.selectAll('rect')
+          .data(colors)
+          .enter()
+          .append('rect')
+          .attr('class', 'legend-colors')
+          .attr('width', legendRectW)
+          .attr('height', legendRectH)
+          .attr('x', (d) => {
+              const min = d3.min(d[0]);
+              return legendScale(min);
+          })
+          .attr('y', 0)
+          .style('fill', (d) => {
+            const min = d3.min(d[0]);
+            return colorMap(min);
+          });
 }
