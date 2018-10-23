@@ -72,7 +72,7 @@ req.onload = () => {
                   .html((d) => {
                     d3.select('#tooltip').attr('data-year', d.year);
                     return `
-                        <p>${months[d.month]} ${d.year}</p>
+                        <p id="tooltip-date">${months[d.month]} ${d.year}</p>
                         <p>${d.change.toFixed(2)}&#8451; | ${d.temp.toFixed(2)}&#8451;</p>
                     `;
                   });                
